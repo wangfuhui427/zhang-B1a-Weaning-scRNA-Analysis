@@ -121,22 +121,20 @@ cm <- clusterData(obj  = fpkm_matrix,
 # Assumes 'go_results' is a dataframe from Enrichr analysis of ClusterGVis modules
                                gene_df<-merged_df
 gene_df$geneCluster<-gene_df$Cluster
-# 数据库
+
 dbs <- c("GO_Biological_Process_2021", 
          "GO_Cellular_Component_2021", 
          "GO_Molecular_Function_2021", 
          "KEGG_2021_Human")
 httr::set_config(httr::config(connecttimeout = 30))
-# 分组分析
 enrich_results <- gene_df %>%
   group_by(geneCluster) %>%
   group_split() %>%
   map_dfr(function(df) {
     genes <- unique(df$Gene)
-    if (length(genes) < 5) return(NULL)  # 跳过太小的集合
+    if (length(genes) < 5) return(NULL)  
     enriched <- enrichr(genes, dbs)
     
-    # 筛选并合并结果
     bind_rows(lapply(names(enriched), function(dbname) {
       enriched[[dbname]] %>%
         filter(P.value < 0.1) %>%
