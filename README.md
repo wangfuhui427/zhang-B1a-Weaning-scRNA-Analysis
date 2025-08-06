@@ -6,7 +6,7 @@ This repository contains the R scripts used for the analysis and figure generati
 
 ## Data Availability
 
-The raw and processed data are available at the Gene Expression Omnibus (GEO) under accession number: [请在这里填写您的GEO登录号].
+All raw and processed data have been deposited at NODE with the provisional project ID: SUB00041704 (https://www.biosino.org/node/). 
 
 ## Software and Environment
 
@@ -27,6 +27,6 @@ The analyses were performed in R (v4.3.0) on a macOS system. The following key R
     - `01_scRNA_QC_and_Clustering.R`: Generates Figure 1.
     - `02_Developmental_Trajectory_Analysis.R`: Generates Figure 2.
     - `03_BCR_Repertoire_Analysis.R`: Generates Figure 3 and Supplementary Figure 2.
-    - `S1_Bulk_RNAseq_Analysis.R`: Generates Supplementary Figure 1a-b.
-
+    - `S1_Bulk_RNAseq_Analysis.R`: Generates Supplementary Figure 1.
+    - `S2_Subset-specific BCR characteristics.R`: Generates Supplementary Figure 2.
 Please refer to the comments within each script for detailed explanations of each step.
