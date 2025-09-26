@@ -1,12 +1,12 @@
 # zhang-B1a-Weaning-scRNA-Analysis
-R scripts for the analysis and figure generation of the manuscript "A single-cell transcriptomic and B-cell receptor repertoire dataset of mouse peritoneal B-1a cells across the weaning transition"
-# Code for: A single-cell transcriptomic and B-cell receptor repertoire dataset of mouse peritoneal B-1a cells across the weaning transition
+R scripts for the analysis and figure generation of the manuscript "Weaning-driven Dietary Transition Shapes Transcriptome and BCR Repertoire of Mouse Peritoneal B1a Cells: Insights from Single-cell Analysis"
+# Code for: Weaning-driven Dietary Transition Shapes Transcriptome and BCR Repertoire of Mouse Peritoneal B1a Cells: Insights from Single-cell Analysis
 
 This repository contains the R scripts used for the analysis and figure generation in our manuscript submitted to *Scientific Data*.
 
 ## Data Availability
 
-All raw and processed data have been deposited at NODE with the provisional project ID: SUB00041704 (https://www.biosino.org/node/). 
+All raw and processed data have been deposited at NODE with the project ID: OEP00006590 (https://www.biosino.org/node/). 
 
 ## Software and Environment
 
