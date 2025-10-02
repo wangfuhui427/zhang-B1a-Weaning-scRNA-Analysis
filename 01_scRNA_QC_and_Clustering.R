@@ -4,14 +4,29 @@ library(ggplot2)
 library(dplyr)
 
 # --- Quality Control Violin Plots ---
-# Assumes 'sample_id' is a column in the metadata
+seurat_object[["percent.mt"]] <- PercentageFeatureSet(seurat_object, pattern = "^mt-")
+seurat_object[["percent.ribo"]] <- PercentageFeatureSet(seurat_object, pattern = "^Rps|^Rpl")
+ery_genes <- c("Hbb-bt", "Hba-a1", "Hba-a2","Hbb-bs","Klf1","Tal1")
+mye_genes<-c("Cd68","Ly6c","Ly6g","Csf1r","Cd34")
+T_genes<-c("Cd3e","Cd8a","Cd4")
+CLP_genes<-c("Il7r","Cd19","Cd79a","Cd79b","Vpreb1","Dntt","Rag1","Rag2")
+Idents(seurat_object)<-"Sample"
+ery_genes <- ery_genes[ery_genes %in% rownames(seurat_object)]
+mye_genes <- mye_genes[mye_genes %in% rownames(seurat_object)]
+T_genes <- T_genes[T_genes %in% rownames(seurat_object)]
+CLP_genes <- CLP_genes[CLP_genes %in% rownames(seurat_object)]
+seurat_object[["ery_expr"]] <- Matrix::colSums(seurat_object@assays$RNA@data[ery_genes, , drop = FALSE])
+seurat_object[["mye_expr"]] <- Matrix::colSums(seurat_object@assays$RNA@data[mye_genes, , drop = FALSE])
+seurat_object[["T_expr"]] <- Matrix::colSums(seurat_object@assays$RNA@data[T_genes, , drop = FALSE])
+seurat_object[["CLP_expr"]] <- Matrix::colSums(seurat_object@assays$RNA@data[CLP_genes, , drop = FALSE])
+VlnPlot(seurat_object, features = c("mye_expr", "T_expr","ery_expr"), ncol = 3,raster=FALSE)
 VlnPlot(seurat_object_peritoneal, 
         features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), 
         group.by = "sample_id", 
         pt.size = 0, 
         ncol = 3)
 
-# ---  UMAP of Transcriptional Clusters ---
+# --- CCA and UMAP of Transcriptional Clusters ---
 sub_obj <- WhichCells(seurat_object, idents = c("WT_1WK","WT_3WK",""WT_5WK",""WT_7WK","WT_10WK"))
 sub_obj <- subset(seurat_object, cells = sub_obj)
 B1A.list <- SplitObject(sub_obj, split.by = "Sample")
