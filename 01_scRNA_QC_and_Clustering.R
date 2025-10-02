@@ -3,7 +3,7 @@ library(Seurat)
 library(ggplot2)
 library(dplyr)
 
-# --- Figure 1b: Quality Control Violin Plots ---
+# --- Quality Control Violin Plots ---
 # Assumes 'sample_id' is a column in the metadata
 VlnPlot(seurat_object_peritoneal, 
         features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), 
@@ -11,14 +11,47 @@ VlnPlot(seurat_object_peritoneal,
         pt.size = 0, 
         ncol = 3)
 
-# --- Figure 1c: UMAP of Transcriptional Clusters ---
+# ---  UMAP of Transcriptional Clusters ---
+sub_obj <- WhichCells(seurat_object, idents = c("WT_1WK","WT_3WK",""WT_5WK",""WT_7WK","WT_10WK"))
+sub_obj <- subset(seurat_object, cells = sub_obj)
+B1A.list <- SplitObject(sub_obj, split.by = "Sample")
+B1A.list <- lapply(X = B1A.list, FUN = function(x) {
+  DefaultAssay(x) <- "RNA"
+  x@assays$RNA@scale.data <- matrix()
+  x@assays$RNA@meta.features <- data.frame(row.names = rownames(x@assays$RNA@data))  # <<<<<< 修复点
+  x@assays$RNA@var.features <- character()
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  
+  return(x)
+})
+
+features <- SelectIntegrationFeatures(object.list = B1A.list)
+cell.anchors <- FindIntegrationAnchors(object.list = B1A.list,anchor.features = features, dims = 1:20)
+cell.combined <- IntegrateData(anchorset = cell.anchors, dims = 1:20)
+
+subset_object<-cell.combined
+subset_object <- ScaleData(subset_object)
+subset_object <- RunPCA(subset_object, npcs = 30)
+subset_object <- RunUMAP(subset_object, dims = 1:30)
+subset_object <- RunTSNE(subset_object,  dims = 1:30)
+subset_object<- FindNeighbors(subset_object,  dims = 1:30)
+subset_object <- FindClusters(subset_object, resolution = 0.5)
+
+# Visualization
+p1 <- DimPlot(subset_object, reduction = "umap", label=TRUE, group.by = "seurat_clusters",raster = FALSE)
+p2 <- DimPlot(subset_object, reduction = "umap", label = TRUE, repel = TRUE,split="Sample",raster = FALSE)
+p1
+DimPlot(seurat_object_integrated, 
+        reduction = "umap", 
+        group.by = "Sample")
 DimPlot(seurat_object_peritoneal, 
         reduction = "umap", 
         group.by = "seurat_clusters", 
         label = TRUE, 
         label.size = 5) + NoLegend()
 
-# --- Figure 1d: Marker Gene Dot Plot ---
+# --- Marker Gene Dot Plot ---
 # List of key marker genes for the 12 clusters
 marker_genes <- c("Fos", "Junb", "Cd25", "Hspa1a", "Ighd", "Cdkn1a", "Mki67", ...) # Add your top markers
 DotPlot(seurat_object_peritoneal, 
