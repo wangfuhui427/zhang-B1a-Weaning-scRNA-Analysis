@@ -1,8 +1,41 @@
-# --- Figure 2a: Integrated UMAP by Time Point ---
+# ---Integrated UMAP by Time Point ---
+sub_obj <- WhichCells(seurat_object, idents = c("WT_1WK","WT_3WK",""WT_5WK",""WT_7WK","WT_10WK"))
+sub_obj <- subset(seurat_object, cells = sub_obj)
+B1A.list <- SplitObject(sub_obj, split.by = "Sample")
+B1A.list <- lapply(X = B1A.list, FUN = function(x) {
+  DefaultAssay(x) <- "RNA"
+  x@assays$RNA@scale.data <- matrix()
+  x@assays$RNA@meta.features <- data.frame(row.names = rownames(x@assays$RNA@data))  # <<<<<< 修复点
+  x@assays$RNA@var.features <- character()
+  x <- NormalizeData(x)
+  x <- FindVariableFeatures(x, selection.method = "vst", nfeatures = 2000)
+  
+  return(x)
+})
+
+features <- SelectIntegrationFeatures(object.list = B1A.list)
+cell.anchors <- FindIntegrationAnchors(object.list = B1A.list,anchor.features = features, dims = 1:20)
+cell.combined <- IntegrateData(anchorset = cell.anchors, dims = 1:20)
+
+subset_object<-cell.combined
+subset_object <- ScaleData(subset_object)
+subset_object <- RunPCA(subset_object, npcs = 30)
+subset_object <- RunUMAP(subset_object, dims = 1:30)
+subset_object <- RunTSNE(subset_object,  dims = 1:30)
+subset_object<- FindNeighbors(subset_object,  dims = 1:30)
+subset_object <- FindClusters(subset_object, resolution = 0.5)
+
+# Visualization
+p1 <- DimPlot(subset_object, reduction = "umap", label=TRUE, group.by = "seurat_clusters",raster = FALSE)
+p2 <- DimPlot(subset_object, reduction = "umap", label = TRUE, repel = TRUE,split="Sample",raster = FALSE)
+p1
+DimPlot(seurat_object_integrated, 
+        reduction = "umap", 
+        group.by = "Sample")
 DimPlot(seurat_object_integrated, 
         reduction = "umap", 
         group.by = "timepoint")
-# --- Figure 2c: Dotplot of markers ---
+# --- Dotplot of markers ---
 library(Seurat)
 library(ggplot2)
 library(dplyr)
@@ -57,11 +90,11 @@ p_dotplot_custom <- DotPlot(seurat_object,
 p_dotplot_custom
 
 
-# --- Figure : Feature Plots of Key Genes ---
+# ---  Feature Plots of Key Genes ---
 FeaturePlot(seurat_object_integrated, 
             features = c("Mki67", "Isg15", "Zbtb32"), 
             ncol = 3)
-# --- Figure 2d :ssGSEA Plots of cell cycle Genesets ---
+# --- ssGSEA Plots of cell cycle Genesets ---
 
 ####
 gene_sets <- lapply(gene_sets, function(genes) {
@@ -105,7 +138,7 @@ ggplot(sub_umap_data, aes(x = UMAP_1, y = UMAP_2, color = geneset)) +
   #) +
   labs(title = "KEGG_apoptosis Expression in UMAP by Sample",
        x = "UMAP 1", y = "UMAP 2", color = "Expression")
-# --- Figure 2e: ClusterGVis Heatmap Preparation ---
+# ---ClusterGVis Heatmap Preparation ---
 # This code prepares the data for ClusterGVis
 pseudo_bulk_data <- AggregateExpression(seurat_object_integrated, 
                                         group.by = c("timepoint"), 
@@ -117,7 +150,7 @@ fpkm_matrix<- fpkm_matrix[rowMeans(fpkm_matrix) > 0.2, ]
 cm <- clusterData(obj  = fpkm_matrix,
                   cluster.method = "mfuzz",
                   cluster.num = 6)
-# --- Figure 2f: Functional Enrichment Plot ---
+# ---Functional Enrichment Plot ---
 # Assumes 'go_results' is a dataframe from Enrichr analysis of ClusterGVis modules
                                gene_df<-merged_df
 gene_df$geneCluster<-gene_df$Cluster
