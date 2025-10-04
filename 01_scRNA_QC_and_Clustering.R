@@ -99,7 +99,7 @@ heatmap_plot <- DoHeatmap(seurat_object,
   theme(axis.text.y = element_text(size = 4))
 
 heatmap_plot
-# --- Figure 1e: Cluster Proportion Bar Plot ---
+# --- Cluster Proportion Bar Plot ---
 metadata <- seurat_object_peritoneal@meta.data
 metadata %>%
   group_by(timepoint, seurat_clusters) %>%
@@ -110,7 +110,7 @@ metadata %>%
   theme_classic() +
   scale_y_continuous(labels = scales::percent) +
   ylab("Proportion")
-# --- Figure 1f: Cluster marker umap Featureplot---
+# --- Cluster marker umap Featureplot---
 library(Seurat)
 library(ggplot2)
 features <- c("Fos", "Fosb", "Jun", "Junb", "Lifr", "Il2ra", 
